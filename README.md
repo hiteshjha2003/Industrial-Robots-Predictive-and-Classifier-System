@@ -105,65 +105,70 @@ industrial-robot-predictive-mtce/
 └── requirements.txt
 ```
 
-Tech Stack & Key ML Concepts
+## System Architecture
 
-Tech Stack & Key ML Concepts
+```
+mermaid
+graph TD
+    A[Raw Sensor Data<br>(Vibration, Torque, Temperature, Current)] --> B[1. Data Generation / Ingestion<br>synthetic_robot_data.py]
+    B --> C[2. Data Cleaning<br>clean.py<br>• Missing values<br>• Outliers<br>• Duplicates]
+    C --> D[3. Feature Engineering<br>build_features.py<br>• Rolling stats (mean/std/min/max)<br>• FFT spectral features<br>• Gradients & cyclic encodings<br>• → 80+ features]
+    D --> E[4. Model Training<br>train.py<br>• XGBoost Regressor → RUL<br>• XGBoost Classifier → Failure Mode<br>• Stratified split + class weights<br>• Early stopping]
+    E --> F[5. Artifacts<br>• xgb_regressor.joblib<br>• xgb_classifier.joblib<br>• feature_scaler.joblib<br>• target_scaler.joblib<br>• label_encoder.joblib]
+    F --> G[6. Real-time Inference<br>inference.py / Predictor class<br>• Single-row feature approximation<br>• Predict RUL + Failure Probabilities]
+    G --> H[7. Streamlit Dashboard<br>app/main.py<br>• Dark futuristic UI<br>• Live RUL Gauge (Plotly)<br>• Failure Mode Probability Chart<br>• Pipeline status badges]
+    H --> I[End User / Operator<br>Browser → localhost:8501 or deployed URL]
 
+    style A fill:#0d1117,stroke:#58a6ff
+    style H fill:#161b22,stroke:#3fb950,stroke-width:3px
 
+```
 
+ 
+## 🛠 Tech Stack & Key ML Concepts
 
+RobotGuard AI is built with a modern, efficient, and production-ready stack.  
+Think of it as the **complete toolkit** for a next-gen predictive maintenance system.
 
+### Core Language & Runtime
+- **Python 3.10+**  
+  Fast, readable, and the perfect foundation for ML engineering.
 
+### User Interface & Visualization
+- **Streamlit** + **Plotly**  
+  Powers the dark, futuristic dashboard with real-time gauges, probability bars, and smooth animations.
 
+### Data Processing & Storage
+- **Pandas** + **NumPy** + **PyArrow**  
+  Lightning-fast data wrangling, memory-efficient Parquet handling, and massive dataset support.
 
+### Feature Engineering
+- **SciPy** (signal processing) + **Custom rolling logic**  
+  Extracts 80+ powerful features: time-domain stats (mean/std/min/max), FFT spectral analysis (RMS, peak frequency, entropy), gradients, and cyclic encodings.
 
+### Modeling & Learning
+- **XGBoost** (both regression & multi-class classification)  
+  High-performance gradient boosting with early stopping, class weighting, and tuned hyperparameters for robust RUL and failure mode prediction.
 
+### Preprocessing & Utilities
+- **scikit-learn**  
+  Reliable scaling (`StandardScaler`), encoding (`LabelEncoder`), and evaluation metrics.
 
+### Deployment & Automation
+- **Docker** + **docker-compose**  
+  Containerized, portable, and ready for local or cloud deployment.
+- **Makefile**  
+  One-command magic: `make all`, `make train`, `make docker-up`, etc.
+- **GitHub Actions** + **Dependabot**  
+  Automated linting, testing, Docker builds, dependency updates, and CI/CD.
 
+### Configuration & Project Management
+- **YAML** (config/config.yaml)  
+  Centralized control of pipeline parameters (windows, paths, training settings).
+- **pyproject.toml**  
+  Modern project metadata, scripts, and dependency management (editable install, dev tools).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-LayerTechnology & ToolsPurpose / Creative TouchLanguagePython 3.10+Fast, readable, ML-firstUI/DashboardStreamlit + PlotlyDark futuristic theme, interactive gaugesData ProcessingPandas, NumPy, PyArrowEfficient Parquet, memory downcastingFeature EngineeringSciPy (FFT), custom rolling stats80+ features: time-domain + spectralModelingXGBoost (regression + classification)High performance, early stopping, class weightsPreprocessingscikit-learn (StandardScaler, LabelEncoder)Feature scaling, encodingDeploymentDocker, docker-compose, MakefileOne-command local & cloud deploymentAutomationGitHub Actions CI/CD, DependabotLint, test, build, auto-updatesConfigYAML + pyproject.tomlModern project metadata & scripts
+This stack was chosen for **performance**, **readability**, **scalability**, and **developer joy** — while keeping everything CPU-friendly and production-grade.
 
 
 ML Highlights Covered
@@ -206,12 +211,12 @@ streamlit run app/main.py
 → Open http://localhost:8501
 
 3. Using Makefile (Recommended – one command magic)
-make all          # Full pipeline: install → generate → clean → features → train → dashboard
-make data         # Only generate data
-make train        # Only train models
-make streamlit    # Launch dashboard
-make clean        # Remove generated data & models
-make docker-up    # Run via Docker Compose
+   make all          # Full pipeline: install → generate → clean → features → train → dashboard
+   make data         # Only generate data
+   make train        # Only train models
+   make streamlit    # Launch dashboard
+   make clean        # Remove generated data & models
+   make docker-up    # Run via Docker Compose
 
 4. Docker Deployment
 # Build image
@@ -220,7 +225,7 @@ docker build -t robotguard-ai .
 # Run container
 docker run -p 8501:8501 -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models robotguard-ai
 Or with docker-compose:
-Bashdocker compose up -d web
+docker compose up -d web
 Dashboard → http://localhost:8501
 
 Dashboard Features
