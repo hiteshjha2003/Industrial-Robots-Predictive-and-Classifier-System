@@ -1,0 +1,52 @@
+# docker-compose.yml
+version: "3.9"
+
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: robotguard-web
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount data and models folders so files persist after container stops/restarts
+      - ./data:/app/data
+      - ./models:/app/models
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_ENABLE_CORS=false
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    command: >
+      streamlit run app/main.py
+      --server.port=8501
+      --server.address=0.0.0.0
+      --server.headless=true
+
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: robotguard-train
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Do NOT set restart: always → we want it to exit after training
+    command: >
+      python src/modeling/train.py --mode sample
+    profiles: ["train"]   # only starts when explicitly requested
+
+# Optional: define named volumes if you prefer not using bind mounts
+# volumes:
+#   robotguard-data:
+#   robotguard-models:

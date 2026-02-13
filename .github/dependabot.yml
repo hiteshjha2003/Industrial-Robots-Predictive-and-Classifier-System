@@ -1,0 +1,59 @@
+# .github/dependabot.yml
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+
+  # Python dependencies (requirements.txt)
+  - package-ecosystem: "pip"
+    directory: "/"                     # root of repo (where requirements.txt lives)
+    schedule:
+      interval: "weekly"               # can be daily/weekly/monthly
+      time: "03:00"                    # UTC time (adjust to your preference)
+      timezone: "Asia/Kolkata"         # IST timezone
+    open-pull-requests-limit: 10
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "pip"
+      - "auto-merge"                   # optional – if you use auto-merge bot
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    reviewers:
+      - "your-github-username"         # ← replace with your username or team
+    assignees:
+      - "your-github-username"
+    ignore:
+      # Example: ignore major version bumps for certain packages
+      - dependency-name: "xgboost"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "streamlit"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"                     # checks .github/workflows/*.yml
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(gha)"
+    reviewers:
+      - "your-github-username"
+
+  # Optional: if you later add npm / Docker dependencies
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"
+
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"

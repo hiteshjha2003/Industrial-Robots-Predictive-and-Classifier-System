@@ -1,0 +1,18 @@
+# .dockerignore
+.git
+.gitignore
+__pycache__
+*.pyc
+*.py[cod]
+data/
+models/
+.ipynb_checkpoints
+*.ipynb
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+tmp/
+.cache/
+.streamlit/

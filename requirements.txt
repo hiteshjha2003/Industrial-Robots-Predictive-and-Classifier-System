@@ -1,0 +1,73 @@
+# Project dependencies
+# Core data processing
+pandas
+numpy
+pyarrow  # for efficient parquet handling
+
+# Data generation & processing
+scipy
+
+# Feature engineering & ML
+scikit-learn
+shap
+boruta
+
+# Modeling
+xgboost
+lightgbm
+catboost
+torch  # for deep learning (CNN)
+torchvision  # optional but useful
+torchaudio  # optional
+
+# Hyperparameter tuning
+optuna
+
+# Model tracking & registry
+mlflow
+
+# Feature store (Feast)
+feast
+
+# Big data processing (PySpark - for full-scale ETL)
+# pyspark
+
+# Explainability & evaluation
+matplotlib
+seaborn
+plotly
+yellowbrick  # for learning curves, etc.
+
+# API & serving
+fastapi
+uvicorn
+pydantic
+
+# Monitoring & data quality
+prometheus-client
+great-expectations
+
+# Model export & inference
+onnx
+onnxruntime
+# torchscript  # included in torch
+
+# Utilities
+tqdm
+pyyaml
+joblib
+click  # for CLI scripts
+python-dotenv
+psutil
+
+# Testing
+pytest
+pytest-cov
+
+# Notebook extras
+jupyter
+ipykernel
+ipywidgets
+
+# Optional: for Kalman filter in features
+filterpy

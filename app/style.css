@@ -1,0 +1,141 @@
+/* style.css - Futuristic Dark Theme for RobotGuard AI */
+
+:root {
+    --bg-main: #0d1117;
+    --bg-card: #161b22;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --accent: #58a6ff;
+    --accent-dark: #388bfd;
+    --success: #3fb950;
+    --warning: #d29922;
+    --danger: #f85149;
+    --border: #30363d;
+    --gradient: linear-gradient(135deg, #58a6ff, #3fb950);
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.stApp {
+    background-color: var(--bg-main);
+}
+
+header,
+.stApp>div:first-child {
+    background-color: var(--bg-main) !important;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #0d1117 !important;
+    border-right: 1px solid var(--border) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+h1 {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    font-size: 3.2rem !important;
+}
+
+/* Buttons */
+.stButton>button {
+    background: var(--gradient) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 28px !important;
+    font-weight: bold !important;
+    box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.stButton>button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 30px rgba(88, 166, 255, 0.5) !important;
+}
+
+/* Cards & Containers */
+div[data-testid="stVerticalBlock"]>div {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Metrics */
+div[data-testid="stMetric"] {
+    background-color: #0d1117 !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+}
+
+/* Inputs */
+.stTextInput>div>div>input,
+.stNumberInput>div>div>input,
+.stSelectbox>div>div>select {
+    background-color: #21262d !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+}
+
+/* Progress */
+.stProgress>div>div>div {
+    background: var(--gradient) !important;
+}
+
+/* Success / Error */
+.stSuccess,
+.stError,
+.stWarning {
+    border-radius: 10px !important;
+    padding: 1rem !important;
+    margin: 1rem 0 !important;
+}
+
+.stSuccess {
+    background-color: rgba(63, 185, 80, 0.15) !important;
+    border-left: 5px solid var(--success) !important;
+}
+
+.stError {
+    background-color: rgba(248, 81, 73, 0.15) !important;
+    border-left: 5px solid var(--danger) !important;
+}
+
+.stWarning {
+    background-color: rgba(210, 153, 34, 0.15) !important;
+    border-left: 5px solid var(--warning) !important;
+}
+
+/* Footer */
+footer {
+    visibility: hidden;
+}
+
+footer:after {
+    content: "RobotGuard AI • Powered by xAI & Streamlit";
+    visibility: visible;
+    display: block;
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 1rem;
+    font-size: 0.9rem;
+}

@@ -1,0 +1,83 @@
+1. Business Problem (1 min)
+
+"The project solves predictive maintenance for 2,000 six-axis robots in a car manufacturing line. Unplanned downtime costs $80k/hour. We predict Remaining Useful Life (RUL) in hours (regression) and failure mode (classification) to enable just-in-time maintenance, potentially saving $4M/year."
+Why ML? "Rule-based systems can't handle complex sensor patterns; ML exploits multi-modal data (vibration, torque, temperature) for accurate predictions."
+Your role: "I designed and implemented the full pipeline as an ML Engineer, from data synth to deployment."
+
+2. Data (1–2 min)
+
+"No public dataset had multi-modal telemetry + labels, so I built a high-fidelity synthetic generator: 50 robots × 6 joints × 2 years @ 100Hz (~2B rows). It simulates 5 failure modes with realistic degradation (e.g., vibration spikes for bearing wear)."
+Challenges: "Fixed bugs in RUL cycles and label corruption to ensure monotonic decrease and multi-mode distribution."
+Sample stats: "604k rows in sample mode, with RUL min/mean/max: 0/84/400 hours."
+
+3. Data Preparation & Feature Engineering (2 min)
+
+Cleaning: "Handled missing (forward-fill + indicators), outliers (Isolation Forest), duplicates. Saved as Parquet for efficiency."
+Features: "Engineered 118+ domain features: rolling stats (mean/std/min/max/skew over 1s–30s windows), frequency-domain (FFT RMS, peak freq, entropy), residuals, gradients, cyclic encodings."
+"Used groupby per robot-joint to maintain time-series integrity. Fixed single-row inference by approximating features in predictor."
+
+4. Modeling (2 min)
+
+"Hybrid task: XGBoost regressor for RUL, classifier for modes. Scaled features (StandardScaler) and RUL (MinMax). Handled single-class in sample by skipping classifier."
+Training: "Time-based split (70/15/15) to avoid leakage. Early stopping, verbose progress for ETA."
+Results: "RUL: MAE 1.67h, RMSE 2.86h, R² 0.85 (on scaled). Classifier: Accuracy 0.94, F1 0.92 (full data)."
+Challenges: "Negative R² fixed by scaling and debugged distributions."
+
+5. Deployment & Dashboard (1–2 min)
+
+"Built FastAPI for inference, but integrated into Streamlit dashboard ('RobotGuard AI') for end-to-end demo."
+"Real-time prediction from raw sensors: approximates features, scales, predicts RUL with Plotly gauge (red/orange/green zones)."
+"Dark futuristic UI with progress bars, animations, responsive design."
+
+6. Extensions & Learnings (1 min)
+
+"Roadmap: Continual learning, AutoML, federated training."
+"Learnings: Time-series pitfalls (leakage, non-stationarity), real-time feature approx, portfolio polish."
+
+
+Detailed ML Concepts with Technical Definitions & Examples
+Below is a categorized list of all ML concepts used in the project. Each includes:
+
+Technical Definition: Precise explanation.
+Example: Code snippet or scenario relevant to the project.
+
+1. Data Generation & Handling
+
+Synthetic Data Generation
+Definition: Creating artificial datasets that mimic real-world data distributions, often used when real data is scarce, expensive, or sensitive. Involves simulating patterns, noise, and labels based on domain knowledge.
+Example: In the project, generate telemetry with degradation cycles:Python
+
+
+Expected Interview Questions & Answers
+(As provided in your query — no changes needed, but practice with examples above.)
+
+Tell me about a challenging ML project you've worked on.
+Answer: Use the above explanation. Highlight fixing synthetic data bugs (e.g., RUL corruption) and real-time feature approx for inference.
+
+How did you handle time-series data to avoid leakage?
+Answer: "Used time-based split (earliest 70% train, next 15% val, last 15% test). Grouped by robot-joint for features. No random shuffle."
+
+Why XGBoost? How did you tune it?
+Answer: "Handles non-linearity, interpretable, efficient for tabular data. Tuned with early stopping (50 rounds), learning_rate=0.05, max_depth=8. Could use Optuna for full hyperparam search."
+
+How did you deal with imbalanced failure modes?
+Answer: "In sample, single mode — skipped classifier. In full, used focal loss and class mapping. Ensured synthetic generator produced balanced modes."
+
+What metrics did you use and why?
+Answer: "RUL (regression): MAE/RMSE for error magnitude, R² for variance explained. Classification: Macro F1 for balanced classes, ROC-AUC for probabilities. Negative R² debugged via scaling."
+
+How would you deploy this in production?
+Answer: "FastAPI microservice in Docker/K8s. Feast feature store for online features. Monitor drift with Prometheus/Grafana. Retrain weekly via Airflow."
+
+What if data is imbalanced or missing?
+Answer: "SMOTE for imbalance. Missing: forward-fill + indicators. Outliers: Isolation Forest. Monitored with Great Expectations."
+
+How did you handle real-time inference?
+Answer: "Approximated rolling/spectral features with current values (mean=val, std=0). For accuracy, could use Kafka buffer for last 30s data."
+
+Behavioral: How did you debug negative R²?
+Answer: "Checked distributions (min/max/mean per split). Found scale mismatch → added MinMaxScaler for RUL (0–1). Retrained, R² improved to 0.85."
+
+System Design: Scale to 1000 robots?
+Answer: "PySpark for ETL/features. MLflow registry. Kubernetes autoscaling. Federated learning for privacy."
+
