@@ -165,7 +165,7 @@ Think of it as the **complete toolkit** for a next-gen predictive maintenance sy
 This stack was chosen for **performance**, **readability**, **scalability**, and **developer joy** — while keeping everything CPU-friendly and production-grade.
 
 
-ML Highlights Covered
+### ML Highlights Covered
 
 Synthetic data simulation with realistic degradation
 Time-series pitfalls avoided (no leakage, temporal split)
@@ -178,6 +178,7 @@ Quick Start Guide
 Prerequisites
 
 Python 3.10+
+
 Git
 (Optional) Docker + docker-compose
 
@@ -188,23 +189,23 @@ cd Industrial-Robots-Predictive-and-Classifier-System
 pip install -r requirements.txt
 
 2. Run Full Pipeline (Manual)
-# 1. Generate synthetic data
+### 1. Generate synthetic data
 python src/etl/synthetic_data_generator.py --mode sample
 
-# 2. Clean
+### 2. Clean
 python src/etl/clean.py --mode sample
 
-# 3. Build features
+### 3. Build features
 python src/features/build_features.py
 
-# 4. Train models
+### 4. Train models
 python src/modeling/train.py --mode sample
 
-# 5. Launch dashboard
+### 5. Launch dashboard
 streamlit run app/main.py
 → Open http://localhost:8501
 
-### 3. Using Makefile (Recommended – one command magic)
+## 3. Using Makefile (Recommended – one command magic)
 ####   make all    # Full pipeline: install → generate → clean → features → train → dashboard
 ####   make data         # Only generate data
 ####   make train        # Only train models
@@ -213,17 +214,18 @@ streamlit run app/main.py
 ####   make docker-up    # Run via Docker Compose
 
 4. Docker Deployment
-# Build image
+### Build image
 docker build -t robotguard-ai .
 
-# Run container
+### Run container
 docker run -p 8501:8501 -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models robotguard-ai
 Or with docker-compose:
 docker compose up -d web
 
-#### Dashboard → http://localhost:8501
+### Dashboard →
+    http://localhost:8501
 
-#### Dashboard Features
+### Dashboard Features
 Your command center — dark, futuristic, interactive:
 
 #### Home — Overview, metrics, robot image
@@ -233,16 +235,16 @@ Your command center — dark, futuristic, interactive:
 #### Train Models — Trains XGBoost models, shows progress & metrics
 #### Predict & Monitor — Real-time sensor input → RUL gauge (red/orange/green zones) + failure probability bar chart + JSON output
 
-#### Pro Tip: Pipeline status badges (✅ / ⏳) remember progress via session state.
+## Pro Tip: Pipeline status badges (✅ / ⏳) remember progress via session state.
 
-#### Expected Results (Sample Mode – ~5.3M rows)
+## Expected Results (Sample Mode – ~5.3M rows)
 
-#### Regression (RUL)
+## Regression (RUL)
 #### MAE: ~0.10 hours
 #### RMSE: ~0.17 hours
 #### R²: ~0.71 (strong for synthetic data)
 
-#### Classification (Failure Mode)
+## Classification (Failure Mode)
 #### Accuracy: ~0.70–0.85+ (after balancing)
 #### Macro F1: ~0.65–0.80
 (Early runs showed 0.001 due to imbalance → fixed with stratified split + class weights)
@@ -253,9 +255,9 @@ Your command center — dark, futuristic, interactive:
 
 
 
-#### Customization & Next Steps
+## Customization & Next Steps
 
-#### Make RobotGuard your own:
+## Make RobotGuard your own:
 
 #### Add more failure modes in synthetic_data_generator.py
 #### Expand features (more windows, kurtosis, wavelet transforms) in build_features.py
@@ -267,7 +269,7 @@ Your command center — dark, futuristic, interactive:
 
 #### Contribute: PRs welcome! Issues, ideas, forks — all appreciated.
 
-#### License
+## License
 MIT License
 See LICENSE file for full terms.
 Built with ❤️ by Hitesh — powered by curiosity, coffee, and a little help from xAI.
@@ -275,7 +277,7 @@ Questions? Bugs? Feature requests?
 → Open an issue or reach out!
 Happy predicting! 🚀🤖
 
-### Final Notes
+## Final Notes
 
 #### This README will render **perfectly on GitHub** — correct headings, code blocks, tables, emojis, and alignment.
 #### Replace the placeholder banner image URL with a real screenshot of your dashboard later (upload to repo or use imgur).
