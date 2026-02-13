@@ -220,63 +220,66 @@ docker build -t robotguard-ai .
 docker run -p 8501:8501 -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models robotguard-ai
 Or with docker-compose:
 docker compose up -d web
-Dashboard → http://localhost:8501
 
-Dashboard Features
+#### Dashboard → http://localhost:8501
+
+#### Dashboard Features
 Your command center — dark, futuristic, interactive:
 
-Home — Overview, metrics, robot image
-Generate Data — Mode selection, robot count slider, progress animation
-Clean Data — One-click cleaning with spinner
-Feature Engineering — Builds 80+ features, shows preview table & chart
-Train Models — Trains XGBoost models, shows progress & metrics
-Predict & Monitor — Real-time sensor input → RUL gauge (red/orange/green zones) + failure probability bar chart + JSON output
+#### Home — Overview, metrics, robot image
+#### Generate Data — Mode selection, robot count slider, progress animation
+#### Clean Data — One-click cleaning with spinner
+#### Feature Engineering — Builds 80+ features, shows preview table & chart
+#### Train Models — Trains XGBoost models, shows progress & metrics
+#### Predict & Monitor — Real-time sensor input → RUL gauge (red/orange/green zones) + failure probability bar chart + JSON output
 
-Pro Tip: Pipeline status badges (✅ / ⏳) remember progress via session state.
+#### Pro Tip: Pipeline status badges (✅ / ⏳) remember progress via session state.
 
-Expected Results (Sample Mode – ~5.3M rows)
+#### Expected Results (Sample Mode – ~5.3M rows)
 
-Regression (RUL)
-MAE: ~0.10 hours
-RMSE: ~0.17 hours
-R²: ~0.71 (strong for synthetic data)
+#### Regression (RUL)
+#### MAE: ~0.10 hours
+#### RMSE: ~0.17 hours
+#### R²: ~0.71 (strong for synthetic data)
 
-Classification (Failure Mode)
-Accuracy: ~0.70–0.85+ (after balancing)
-Macro F1: ~0.65–0.80
+#### Classification (Failure Mode)
+#### Accuracy: ~0.70–0.85+ (after balancing)
+#### Macro F1: ~0.65–0.80
 (Early runs showed 0.001 due to imbalance → fixed with stratified split + class weights)
 
-Runtime
-Full pipeline: ~10–15 minutes on standard CPU laptop
-Inference: <1 second per prediction
+#### Runtime
+#### Full pipeline: ~10–15 minutes on standard CPU laptop
+#### Inference: <1 second per prediction
 
 
 
-Customization & Next Steps
-Make RobotGuard your own:
+#### Customization & Next Steps
 
-Add more failure modes in synthetic_data_generator.py
-Expand features (more windows, kurtosis, wavelet transforms) in build_features.py
-Try other models (LightGBM, CatBoost, TabNet) in train.py
-Improve UI — add SHAP explanations, live trends, alerts
-Scale — switch to Dask/Polars for 10M+ rows
-Deploy — Render.com, Railway.app, AWS ECS, Fly.io
-Monitor — add Prometheus metrics or MLflow tracking
+#### Make RobotGuard your own:
 
-Contribute: PRs welcome! Issues, ideas, forks — all appreciated.
+#### Add more failure modes in synthetic_data_generator.py
+#### Expand features (more windows, kurtosis, wavelet transforms) in build_features.py
+#### Try other models (LightGBM, CatBoost, TabNet) in train.py
+#### Improve UI — add SHAP explanations, live trends, alerts
+#### Scale — switch to Dask/Polars for 10M+ rows
+#### Deploy — Render.com, Railway.app, AWS ECS, Fly.io
+#### Monitor — add Prometheus metrics or MLflow tracking
 
-License
+#### Contribute: PRs welcome! Issues, ideas, forks — all appreciated.
+
+#### License
 MIT License
 See LICENSE file for full terms.
 Built with ❤️ by Hitesh — powered by curiosity, coffee, and a little help from xAI.
 Questions? Bugs? Feature requests?
 → Open an issue or reach out!
 Happy predicting! 🚀🤖
-text### Final Notes
 
-- This README will render **perfectly on GitHub** — correct headings, code blocks, tables, emojis, and alignment.
-- Replace the placeholder banner image URL with a real screenshot of your dashboard later (upload to repo or use imgur).
-- If you want a **LICENSE** file too, just add a standard MIT one:
+### Final Notes
+
+#### This README will render **perfectly on GitHub** — correct headings, code blocks, tables, emojis, and alignment.
+#### Replace the placeholder banner image URL with a real screenshot of your dashboard later (upload to repo or use imgur).
+#### If you want a **LICENSE** file too, just add a standard MIT one:
 
 ```text
 MIT License
