@@ -105,12 +105,12 @@ industrial-robot-predictive-mtce/
 └── requirements.txt
 ```
 
+
 ## System Architecture
 
-```
-mermaid
+```mermaid
 graph TD
-    A[Raw Sensor Data<br>(Vibration, Torque, Temperature, Current)] --> B[1. Data Generation / Ingestion<br>synthetic_robot_data.py]
+    A[Raw Sensor Data<br>Vibration, Torque, Temperature, Current] --> B[1. Data Generation / Ingestion<br>synthetic_robot_data.py]
     B --> C[2. Data Cleaning<br>clean.py<br>• Missing values<br>• Outliers<br>• Duplicates]
     C --> D[3. Feature Engineering<br>build_features.py<br>• Rolling stats (mean/std/min/max)<br>• FFT spectral features<br>• Gradients & cyclic encodings<br>• → 80+ features]
     D --> E[4. Model Training<br>train.py<br>• XGBoost Regressor → RUL<br>• XGBoost Classifier → Failure Mode<br>• Stratified split + class weights<br>• Early stopping]
@@ -121,10 +121,9 @@ graph TD
 
     style A fill:#0d1117,stroke:#58a6ff
     style H fill:#161b22,stroke:#3fb950,stroke-width:3px
-
 ```
 
- 
+
 ## 🛠 Tech Stack & Key ML Concepts
 
 RobotGuard AI is built with a modern, efficient, and production-ready stack.  
@@ -210,13 +209,13 @@ python src/modeling/train.py --mode sample
 streamlit run app/main.py
 → Open http://localhost:8501
 
-3. Using Makefile (Recommended – one command magic)
-   make all          # Full pipeline: install → generate → clean → features → train → dashboard
-   make data         # Only generate data
-   make train        # Only train models
-   make streamlit    # Launch dashboard
-   make clean        # Remove generated data & models
-   make docker-up    # Run via Docker Compose
+### 3. Using Makefile (Recommended – one command magic)
+####   make all    # Full pipeline: install → generate → clean → features → train → dashboard
+####   make data         # Only generate data
+####   make train        # Only train models
+####   make streamlit    # Launch dashboard
+####   make clean        # Remove generated data & models
+####   make docker-up    # Run via Docker Compose
 
 4. Docker Deployment
 # Build image
