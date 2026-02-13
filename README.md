@@ -108,20 +108,14 @@ industrial-robot-predictive-mtce/
 
 ## System Architecture
 
-```mermaid
-graph TD
-    A[Raw Sensor Data\nVibration, Torque, Temperature, Current] --> B[1. Data Generation / Ingestion\nsynthetic_robot_data.py]
-    B --> C[2. Data Cleaning\nclean.py\n- Missing values\n- Outliers\n- Duplicates]
-    C --> D[3. Feature Engineering\nbuild_features.py\n- Rolling stats (mean/std/min/max)\n- FFT spectral features\n- Gradients & cyclic encodings\n- → 80+ features]
-    D --> E[4. Model Training\ntrain.py\n- XGBoost Regressor → RUL\n- XGBoost Classifier → Failure Mode\n- Stratified split + class weights\n- Early stopping]
-    E --> F[5. Artifacts\n- xgb_regressor.joblib\n- xgb_classifier.joblib\n- feature_scaler.joblib\n- target_scaler.joblib\n- label_encoder.joblib]
-    F --> G[6. Real-time Inference\ninference.py / Predictor class\n- Single-row feature approximation\n- Predict RUL + Failure Probabilities]
-    G --> H[7. Streamlit Dashboard\napp/main.py\n- Dark futuristic UI\n- Live RUL Gauge (Plotly)\n- Failure Mode Probability Chart\n- Pipeline status badges]
-    H --> I[End User / Operator\nBrowser → localhost:8501 or deployed URL]
 
-    style A fill:#0d1117,stroke:#58a6ff
-    style H fill:#161b22,stroke:#3fb950,stroke-width:3px
 
+<p align="center">
+  <img src="docs/architecture.png" alt="RobotGuard AI System Architecture" width="900"/>
+  <br/>
+  <strong>Complete ML Pipeline Flow</strong><br/>
+  Raw telemetry → Cleaning → 80+ Features → XGBoost Models → Real-time Predictions → Futuristic Dashboard
+</p>
 
 
 
