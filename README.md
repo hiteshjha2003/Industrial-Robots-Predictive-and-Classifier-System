@@ -110,18 +110,19 @@ industrial-robot-predictive-mtce/
 
 ```mermaid
 graph TD
-    A[Raw Sensor Data<br>Vibration, Torque, Temperature, Current] --> B[1. Data Generation / Ingestion<br>synthetic_robot_data.py]
-    B --> C[2. Data Cleaning<br>clean.py<br>• Missing values<br>• Outliers<br>• Duplicates]
-    C --> D[3. Feature Engineering<br>build_features.py<br>• Rolling stats (mean/std/min/max)<br>• FFT spectral features<br>• Gradients & cyclic encodings<br>• → 80+ features]
-    D --> E[4. Model Training<br>train.py<br>• XGBoost Regressor → RUL<br>• XGBoost Classifier → Failure Mode<br>• Stratified split + class weights<br>• Early stopping]
-    E --> F[5. Artifacts<br>• xgb_regressor.joblib<br>• xgb_classifier.joblib<br>• feature_scaler.joblib<br>• target_scaler.joblib<br>• label_encoder.joblib]
-    F --> G[6. Real-time Inference<br>inference.py / Predictor class<br>• Single-row feature approximation<br>• Predict RUL + Failure Probabilities]
-    G --> H[7. Streamlit Dashboard<br>app/main.py<br>• Dark futuristic UI<br>• Live RUL Gauge (Plotly)<br>• Failure Mode Probability Chart<br>• Pipeline status badges]
-    H --> I[End User / Operator<br>Browser → localhost:8501 or deployed URL]
+    A[Raw Sensor Data\nVibration, Torque, Temperature, Current] --> B[1. Data Generation / Ingestion\nsynthetic_robot_data.py]
+    B --> C[2. Data Cleaning\nclean.py\n- Missing values\n- Outliers\n- Duplicates]
+    C --> D[3. Feature Engineering\nbuild_features.py\n- Rolling stats (mean/std/min/max)\n- FFT spectral features\n- Gradients & cyclic encodings\n- → 80+ features]
+    D --> E[4. Model Training\ntrain.py\n- XGBoost Regressor → RUL\n- XGBoost Classifier → Failure Mode\n- Stratified split + class weights\n- Early stopping]
+    E --> F[5. Artifacts\n- xgb_regressor.joblib\n- xgb_classifier.joblib\n- feature_scaler.joblib\n- target_scaler.joblib\n- label_encoder.joblib]
+    F --> G[6. Real-time Inference\ninference.py / Predictor class\n- Single-row feature approximation\n- Predict RUL + Failure Probabilities]
+    G --> H[7. Streamlit Dashboard\napp/main.py\n- Dark futuristic UI\n- Live RUL Gauge (Plotly)\n- Failure Mode Probability Chart\n- Pipeline status badges]
+    H --> I[End User / Operator\nBrowser → localhost:8501 or deployed URL]
 
     style A fill:#0d1117,stroke:#58a6ff
     style H fill:#161b22,stroke:#3fb950,stroke-width:3px
-```
+
+
 
 
 ## 🛠 Tech Stack & Key ML Concepts
