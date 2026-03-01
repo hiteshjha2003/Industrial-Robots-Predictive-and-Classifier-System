@@ -1,0 +1,79 @@
+/* frontend/assets/css/style.css */
+:root {
+    --bg-dark: #0a0b10;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --accent-cyan: #00f5ff;
+    --accent-green: #00ff41;
+    --accent-red: #ff3e3e;
+    --text-primary: #f0f0f0;
+    --text-muted: #a0a0a0;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.glass {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+}
+
+.neon-border-cyan { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 245, 255, 0.2); }
+.neon-border-green { border-color: var(--accent-green); box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); }
+.neon-border-red { border-color: var(--accent-red); box-shadow: 0 0 15px rgba(255, 62, 62, 0.2); }
+
+.neon-text-cyan { color: var(--accent-cyan); text-shadow: 0 0 10px rgba(0, 245, 255, 0.5); }
+.neon-text-green { color: var(--accent-green); text-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
+
+.predict-gauge {
+    position: relative;
+    width: 200px;
+    height: 100px;
+    overflow: hidden;
+}
+
+/* Animations */
+@keyframes pulse-cyan {
+    0% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 245, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0); }
+}
+
+.status-pulse {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse-cyan 2s infinite;
+}
+
+/* Tab Navigation */
+.nav-link {
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+.nav-link:hover, .nav-link.active {
+    color: var(--accent-cyan);
+    border-bottom-color: var(--accent-cyan);
+}
+
+/* Gradient Backgrounds */
+.bg-mesh {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: 
+        radial-gradient(at 0% 0%, rgba(0, 245, 255, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(0, 255, 65, 0.05) 0px, transparent 50%);
+}

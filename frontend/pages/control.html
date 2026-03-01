@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobotGuard AI - Pipeline Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#0a0b10] text-[#f0f0f0]">
+    <div class="bg-mesh"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-8 right-8 z-[100] transform translate-x-[150%] transition-transform duration-500">
+        <div class="glass border border-cyan-500/50 p-6 rounded-xl shadow-2xl flex items-start gap-4 min-w-[320px]">
+            <div class="text-3xl">✅</div>
+            <div>
+                <h4 class="font-bold text-cyan-400" id="toast-title">Process Completed</h4>
+                <p class="text-white/60 text-sm" id="toast-msg">Check your backend or data dashboard.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/10 px-8 py-4 flex justify-between items-center mx-4 mt-4">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl font-bold neon-text-cyan">🤖 RobotGuard AI</span>
+        </div>
+        <div class="flex gap-8">
+            <a href="../index.html" class="nav-link text-white/70 hover:text-white">Home</a>
+            <a href="control.html" class="nav-link active font-semibold">Pipeline Control</a>
+            <a href="predict.html" class="nav-link text-white/70 hover:text-white">Prediction</a>
+            <a href="analysis.html" class="nav-link text-white/70 hover:text-white">EDA Analysis</a>
+        </div>
+        <div id="connection-status" class="flex items-center gap-2">
+            <div class="status-pulse bg-cyan-400"></div>
+            <span class="text-sm font-medium text-cyan-400">System Online</span>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="mb-12">
+            <h1 class="text-4xl font-bold mb-2">Pipeline <span class="neon-text-cyan">Control Center</span></h1>
+            <p class="text-white/50">Orchestrate the end-to-end ML lifecycle with real-time progress monitoring.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Step 1: Generate -->
+            <div class="glass p-8 space-y-6 border border-white/5 hover:border-cyan-500/30 transition-all group relative overflow-hidden" id="card-generate">
+                <div class="flex justify-between items-start">
+                    <div class="bg-cyan-500/10 p-4 rounded-xl text-3xl">📊</div>
+                    <span class="text-xs font-bold text-white/30 uppercase tracking-widest">Step 01</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-2 group-hover:neon-text-cyan transition-all">Data Generation</h2>
+                    <p class="text-white/50">Simulate high-fidelity robot sensor telemetry with degradation patterns.</p>
+                </div>
+                <div class="space-y-4" id="controls-generate">
+                    <select id="gen-mode" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-cyan-500">
+                        <option value="sample">Sample Mode (Quick - 8 Robots)</option>
+                        <option value="medium">Medium Mode (25 Robots)</option>
+                        <option value="full">Full Production (100+ Robots)</option>
+                    </select>
+                    <button onclick="runStep('generate')" class="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-all">
+                        Execute Generation
+                    </button>
+                </div>
+                <!-- Progress Bar -->
+                <div id="progress-container-generate" class="hidden space-y-3">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span id="msg-generate" class="text-cyan-400">Initializing...</span>
+                        <span id="pct-generate">0%</span>
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-2">
+                        <div id="bar-generate" class="bg-cyan-500 h-2 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(0,245,255,0.5)]" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Clean -->
+            <div class="glass p-8 space-y-6 border border-white/5 hover:border-green-500/30 transition-all group relative overflow-hidden" id="card-clean">
+                <div class="flex justify-between items-start">
+                    <div class="bg-green-500/10 p-4 rounded-xl text-3xl">🧼</div>
+                    <span class="text-xs font-bold text-white/30 uppercase tracking-widest">Step 02</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-2 group-hover:text-green-400 transition-all">Data Sanitization</h2>
+                    <p class="text-white/50">Handle missing values, outliers, and type conversions for ML readiness.</p>
+                </div>
+                <button onclick="runStep('clean')" id="controls-clean" class="w-full py-4 bg-green-500/80 hover:bg-green-400 text-black font-bold rounded-lg transition-all">
+                    Run Cleaning Pipeline
+                </button>
+                <!-- Progress Bar -->
+                <div id="progress-container-clean" class="hidden space-y-3">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span id="msg-clean" class="text-green-400">Initializing...</span>
+                        <span id="pct-clean">0%</span>
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-2">
+                        <div id="bar-clean" class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Features -->
+            <div class="glass p-8 space-y-6 border border-white/5 hover:border-purple-500/30 transition-all group relative overflow-hidden" id="card-features">
+                <div class="flex justify-between items-start">
+                    <div class="bg-purple-500/10 p-4 rounded-xl text-3xl">⚙️</div>
+                    <span class="text-xs font-bold text-white/30 uppercase tracking-widest">Step 03</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-2 group-hover:text-purple-400 transition-all">Feature Engineering</h2>
+                    <p class="text-white/50">Extract 80+ features including rolling stats, FFT, gradients, and cyclic encodings.</p>
+                </div>
+                <button onclick="runStep('features')" id="controls-features" class="w-full py-4 bg-purple-500/80 hover:bg-purple-400 text-black font-bold rounded-lg transition-all">
+                    Compute Feature Matrix
+                </button>
+                <!-- Progress Bar -->
+                <div id="progress-container-features" class="hidden space-y-3">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span id="msg-features" class="text-purple-400">Initializing...</span>
+                        <span id="pct-features">0%</span>
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-2">
+                        <div id="bar-features" class="bg-purple-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Train -->
+            <div class="glass p-8 space-y-6 border border-white/5 hover:border-red-500/30 transition-all group relative overflow-hidden" id="card-train">
+                <div class="flex justify-between items-start">
+                    <div class="bg-red-500/10 p-4 rounded-xl text-3xl">🧠</div>
+                    <span class="text-xs font-bold text-white/30 uppercase tracking-widest">Step 04</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-2 group-hover:text-red-400 transition-all">Model Training</h2>
+                    <p class="text-white/50">Train hybrid XGBoost models for RUL regression and Failure Mode classification.</p>
+                </div>
+                <button onclick="runStep('train')" id="controls-train" class="w-full py-4 bg-red-500/80 hover:bg-red-400 text-black font-bold rounded-lg transition-all">
+                    Start Training Cycle
+                </button>
+                <!-- Progress Bar -->
+                <div id="progress-container-train" class="hidden space-y-3">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span id="msg-train" class="text-red-400">Initializing...</span>
+                        <span id="pct-train">0%</span>
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-2">
+                        <div id="bar-train" class="bg-red-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../assets/js/api.js"></script>
+    <script>
+        const activeIntervals = {};
+
+        async function runStep(step) {
+            const controls = document.getElementById(`controls-${step}`);
+            const progress = document.getElementById(`progress-container-${step}`);
+            
+            // UI Transition
+            if(controls) controls.classList.add('opacity-30', 'pointer-events-none');
+            progress.classList.remove('hidden');
+            
+            try {
+                let res;
+                if (step === 'generate') {
+                    res = await API.generateData(document.getElementById('gen-mode').value);
+                } else if (step === 'clean') {
+                    res = await API.cleanData();
+                } else if (step === 'features') {
+                    res = await API.buildFeatures();
+                } else if (step === 'train') {
+                    res = await API.train();
+                }
+                
+                if (res.status === 'started') {
+                    pollProgress(step);
+                }
+            } catch (e) {
+                alert('API Connection Failed');
+            }
+        }
+
+        function pollProgress(step) {
+            if (activeIntervals[step]) clearInterval(activeIntervals[step]);
+            
+            activeIntervals[step] = setInterval(async () => {
+                try {
+                    const status = await API.getTaskStatus(step);
+                    const bar = document.getElementById(`bar-${step}`);
+                    const pct = document.getElementById(`pct-${step}`);
+                    const msg = document.getElementById(`msg-${step}`);
+                    
+                    if (status) {
+                        const p = status.percentage;
+                        bar.style.width = `${p}%`;
+                        pct.innerText = `${Math.round(p)}%`;
+                        msg.innerText = status.message;
+                        
+                        if (status.status === 'failed') {
+                            clearInterval(activeIntervals[step]);
+                            msg.classList.remove('text-cyan-400', 'text-green-400', 'text-purple-400', 'text-red-400');
+                            msg.classList.add('text-red-500');
+                            resetCard(step);
+                            alert(`Task Failed: ${status.message}`);
+                        } else if (status.status === 'completed' || p >= 100) {
+                            clearInterval(activeIntervals[step]);
+                            showToast(step);
+                            resetCard(step);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Polling error", e);
+                }
+            }, 1000);
+        }
+
+        function resetCard(step) {
+            const controls = document.getElementById(`controls-${step}`);
+            if(controls) controls.classList.remove('opacity-30', 'pointer-events-none');
+        }
+
+        function showToast(step) {
+            const names = {
+                generate: 'Data Generation',
+                clean: 'Data Sanitization',
+                features: 'Feature Engineering',
+                train: 'Model Training'
+            };
+            document.getElementById('toast-title').innerText = `${names[step]} Completed!`;
+            document.getElementById('toast-msg').innerText = "Process is Completed. Check your backend or data dashboard.";
+            
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-x-[150%]');
+            setTimeout(() => {
+                toast.classList.add('translate-x-[150%]');
+            }, 5000);
+        }
+
+        // Connection Health Check
+        setInterval(async () => {
+            try {
+                await API.health();
+                document.getElementById('connection-status').innerHTML = `
+                    <div class="status-pulse bg-cyan-400"></div>
+                    <span class="text-sm font-medium text-cyan-400">System Online</span>
+                `;
+            } catch (e) {
+                document.getElementById('connection-status').innerHTML = `
+                    <div class="status-pulse bg-red-500 animate-none shadow-none"></div>
+                    <span class="text-sm font-medium text-red-500">System Offline</span>
+                `;
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

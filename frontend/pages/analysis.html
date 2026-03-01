@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobotGuard AI - EDA Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#0a0b10] text-[#f0f0f0]">
+    <div class="bg-mesh"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/10 px-8 py-4 flex justify-between items-center mx-4 mt-4">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl font-bold neon-text-cyan">🤖 RobotGuard AI</span>
+        </div>
+        <div class="flex gap-8">
+            <a href="../index.html" class="nav-link text-white/70 hover:text-white">Home</a>
+            <a href="control.html" class="nav-link text-white/70 hover:text-white">Pipeline Control</a>
+            <a href="predict.html" class="nav-link text-white/70 hover:text-white">Prediction</a>
+            <a href="analysis.html" class="nav-link active font-semibold">EDA Analysis</a>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="status-pulse bg-cyan-400"></div>
+            <span class="text-sm font-medium text-cyan-400">Analysis Mode</span>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="flex justify-between items-end mb-12">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">Advanced <span class="neon-text-cyan">EDA Dashboard</span></h1>
+                <p class="text-white/50">Exploratory analysis of generated telemetry datasets and failure characteristics.</p>
+            </div>
+            <button onclick="loadData()" class="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-bold transition-all">
+                🔄 Refresh Analysis
+            </button>
+        </div>
+
+        <!-- High Level Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="glass p-6">
+                <p class="text-white/40 text-xs font-bold uppercase mb-1">Total Observations</p>
+                <p id="total-rows" class="text-2xl font-bold">--</p>
+            </div>
+            <div class="glass p-6">
+                <p class="text-white/40 text-xs font-bold uppercase mb-1">Robot Fleet</p>
+                <p id="robot-count" class="text-2xl font-bold">--</p>
+            </div>
+            <div class="glass p-6">
+                <p class="text-white/40 text-xs font-bold uppercase mb-1">Avg RUL (Hours)</p>
+                <p id="avg-rul" class="text-2xl font-bold text-cyan-400">--</p>
+            </div>
+            <div class="glass p-6">
+                <p class="text-white/40 text-xs font-bold uppercase mb-1">Signal Health</p>
+                <p class="text-2xl font-bold text-green-400">Nominal</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:h-[400px]">
+            <!-- Failure Mode Distribution -->
+            <div class="glass p-8 border border-white/10 h-full">
+                <h3 class="text-white/50 text-sm font-semibold uppercase mb-6">Failure Mode Distribution</h3>
+                <div class="h-[250px] flex items-center justify-center">
+                    <canvas id="failureModeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Telemetry Insights -->
+            <div class="glass p-8 border border-white/10 h-full overflow-hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-white/50 text-sm font-semibold uppercase">Real-time Telemetry (Sample)</h3>
+                    <div class="flex gap-2">
+                        <select onchange="updateTelemetry()" id="robot-select" class="bg-white/5 border border-white/10 text-xs rounded p-1 outline-none">
+                            <option value="0">Robot #0</option>
+                            <option value="1">Robot #1</option>
+                            <option value="2">Robot #2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="h-[250px]">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlations / Feature Distribution Placeholder -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-10">
+            <div class="glass p-8 border border-white/10">
+                <h3 class="text-white/50 text-sm font-semibold uppercase mb-6">Vibration vs. Torque Correlation</h3>
+                <div class="h-[200px] flex items-center justify-center text-white/20 italic">
+                    Scatter plot module loading...
+                </div>
+            </div>
+            <div class="glass p-8 border border-white/10">
+                <h3 class="text-white/50 text-sm font-semibold uppercase mb-6">Dataset Readiness</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between text-sm">
+                        <span>Missing Values</span>
+                        <span class="text-green-400">0.0%</span>
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-2">
+                        <div class="bg-green-400 h-2 rounded-full w-full"></div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Class Balance (SMOTE)</span>
+                        <span class="text-cyan-400">Active</span>
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-2">
+                        <div class="bg-cyan-400 h-2 rounded-full w-4/5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../assets/js/api.js"></script>
+    <script>
+        let failureChart, telemetryChart;
+
+        async function loadData() {
+            try {
+                const summary = await API.getDataSummary();
+                if (summary.status === 'error') {
+                    alert(summary.message);
+                    return;
+                }
+
+                // Update metrics
+                document.getElementById('total-rows').innerText = summary.total_rows.toLocaleString();
+                document.getElementById('robot-count').innerText = summary.robot_count;
+                document.getElementById('avg-rul').innerText = summary.avg_rul.toFixed(2);
+
+                updateFailureChart(summary.failure_mode_dist);
+                updateTelemetry();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function updateFailureChart(dist) {
+            const ctx = document.getElementById('failureModeChart').getContext('2d');
+            if (failureChart) failureChart.destroy();
+
+            failureChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(dist).map(k => k === '0.0' ? 'Normal' : `Error ${k}`),
+                    datasets: [{
+                        data: Object.values(dist),
+                        backgroundColor: [
+                            '#00f5ff', '#ff3e3e', '#ff9f43', '#00ff41', '#9b59b6'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#888', font: { size: 10 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        async function updateTelemetry() {
+            const robotId = document.getElementById('robot-select').value;
+            const data = await API.getTelemetrySample(robotId);
+
+            const ctx = document.getElementById('telemetryChart').getContext('2d');
+            if (telemetryChart) telemetryChart.destroy();
+
+            telemetryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.timestamps.map(t => t.split(' ')[1]), // only time
+                    datasets: [
+                        {
+                            label: 'Vibration',
+                            data: data.vibration,
+                            borderColor: '#00f5ff',
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Torque',
+                            data: data.torque,
+                            borderColor: '#00ff41',
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { display: false },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { dash: [5, 5] }, ticks: { color: '#666' } }
+                    },
+                    plugins: { legend: { display: true, labels: { color: '#888' } } }
+                }
+            });
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>

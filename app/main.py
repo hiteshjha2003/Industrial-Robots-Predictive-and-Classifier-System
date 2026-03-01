@@ -11,15 +11,30 @@ import sys
 import time
 from datetime import datetime
 
-# Find project root by walking up until we find 'src' and 'app'
-current = Path(__file__).resolve().parent  # start from app/
-while current.name != "industrial-robot-predictive-mtce":
-    current = current.parent
-    if current.parent == current:  # reached filesystem root
-        raise RuntimeError("Cannot find project root folder")
+# Find project root
+def find_root():
+    # Try looking for markers from the file location
+    current = Path(__file__).resolve().parent
+    for _ in range(5):  # go up at most 5 levels
+        if (current / "pyproject.toml").exists() or (current / "src").exists():
+            return current
+        if current.parent == current:
+            break
+        current = current.parent
+    
+    # Fallback: check current working directory
+    cwd = Path.cwd()
+    if (cwd / "src").exists() or (cwd / "pyproject.toml").exists():
+        return cwd
+    
+    return None
 
-PROJECT_ROOT = current
-sys.path.insert(0, str(PROJECT_ROOT))  # highest priority
+PROJECT_ROOT = find_root()
+if PROJECT_ROOT:
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))  # highest priority
+else:
+    print("Warning: Project root not explicitly found.")
 
 print("Detected project root:", PROJECT_ROOT)
 print("Updated sys.path:", sys.path[:5])  # debug
@@ -237,7 +252,7 @@ elif page == "🚀 Predict & Monitor":
                             }
                         ))
                         fig.update_layout(height=350)
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
 
                     with col2:
                         # Failure Mode Probabilities
@@ -252,7 +267,7 @@ elif page == "🚀 Predict & Monitor":
                                 color_continuous_scale="RdYlGn_r"
                             )
                             fig_prob.update_layout(height=350)
-                            st.plotly_chart(fig_prob, use_container_width=True)
+                            st.plotly_chart(fig_prob, width='stretch')
 
                     st.json(pred)
 

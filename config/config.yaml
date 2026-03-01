@@ -4,7 +4,7 @@ data:
   months: 6
   freq_hz: 100
   output_dir: data/01_raw/
-  degradation_period_hours: [180, 360, 540]   # different robots different lifetimes
+  degradation_period_hours: [10, 20, 30]   # faster for demo, was [180, 360, 540]
 
 features:
   windows_sec: [1, 3, 6, 10, 30]

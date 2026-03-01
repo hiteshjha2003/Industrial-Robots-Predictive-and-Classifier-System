@@ -32,6 +32,9 @@ dependencies = [
     "tqdm",
     "pyyaml",
     "click",
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]

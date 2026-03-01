@@ -201,15 +201,32 @@ python src/features/build_features.py
 ### 4. Train models
 python src/modeling/train.py --mode sample
 
-### 5. Launch dashboard
+### 5. Launch FastAPI Backend
+```bash
+uvicorn app.api:app --reload
+```
+→ Open http://localhost:8000/docs for Swagger UI
+
+### 6. Launch Premium Frontend
+```bash
+# Simply open the index.html in any modern browser
+# or use a local server:
+cd frontend
+python -m http.server 3000
+```
+→ Open http://localhost:3000
+
+### 7. Launch Streamlit Dashboard (Legacy)
+```bash
 streamlit run app/main.py
+```
 → Open http://localhost:8501
 
 ## 3. Using Makefile (Recommended – one command magic)
-####   make all    # Full pipeline: install → generate → clean → features → train → dashboard
-####   make data         # Only generate data
-####   make train        # Only train models
-####   make streamlit    # Launch dashboard
+####   make all         # Full pipeline: install → generate → clean → features → train → dashboard
+####   make api         # Launch FastAPI backend
+####   make frontend    # Launch Premium HTML/JS frontend
+####   make streamlit   # Launch Streamlit dashboard
 ####   make clean        # Remove generated data & models
 ####   make docker-up    # Run via Docker Compose
 

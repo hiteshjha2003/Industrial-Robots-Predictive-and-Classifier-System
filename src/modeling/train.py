@@ -13,17 +13,18 @@ from sklearn.utils.class_weight import compute_class_weight
 import xgboost as xgb
 import joblib
 from pathlib import Path
-import click
+import os
+import sys
 import time
 import psutil
-import sys
-import os
+import click
+# Add src to sys.path
+from src.utils.helpers import load_config, find_project_root
+from src.utils.progress import update_progress
 
-# Add project root to sys.path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.append(str(PROJECT_ROOT))
-
-from src.utils.helpers import load_config
+PROJECT_ROOT = find_project_root()
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 cfg = load_config()
 
@@ -33,16 +34,19 @@ def get_memory_usage_mb():
     return process.memory_info().rss / 1024 ** 2
 
 
-@click.command()
-@click.option("--mode", default="sample", help="Dataset mode: sample / medium / full")
-def main(mode):
+def run_training(mode="sample"):
     print("Starting model training pipeline...")
     print(f"Mode              : {mode}")
     print(f"Project root      : {PROJECT_ROOT}")
 
+    t_total = time.time()
+    update_progress("train", 5, "Loading feature matrix...")
+
     # ── Paths ───────────────────────────────────────────────────────────────
+    mode = cfg["data"]["mode"] # Overwrite mode from config
     features_path = PROJECT_ROOT / "data" / "03_features" / f"features_{mode}.parquet"
     artifacts_dir = PROJECT_ROOT / cfg["paths"]["model_dir"]
+    artifacts_dir.mkdir(exist_ok=True) # Ensure artifacts directory exists
 
     print(f"Features file     : {features_path}")
     print(f"Artifacts dir     : {artifacts_dir}")
@@ -50,6 +54,7 @@ def main(mode):
 
     if not features_path.exists():
         print("ERROR: Features file not found. Run feature engineering first.")
+        update_progress("train", 0, "Error: Features file not found", status="failed")
         return
 
     start_total = time.time()
@@ -103,26 +108,42 @@ def main(mode):
     print(f"Memory after downcasting: {mem_after_downcast:.1f} MB")
     print(f"Memory saved: ~ {initial_mem - mem_after_downcast:.1f} MB\n")
 
-    # ── Prepare data ────────────────────────────────────────────────────────
-    drop_cols = ["failure_mode", "RUL_hours"]   # only targets remain to drop now
-    feature_cols = [c for c in df.columns if c not in drop_cols]
+    update_progress("train", 20, "Preprocessing and splitting data...")
 
-    X = df[feature_cols]
+    # ── Prepare data ────────────────────────────────────────────────────────
+    # Drop IDs and timestamps that are NOT features
+    drop_cols = ["failure_mode", "RUL_hours", "timestamp", "robot_id", "cycle_id", "joint_id"]
+    feature_cols = [c for c in df.columns if c not in drop_cols]
+    
+    # Identify numeric features for scaling
+    numeric_features = [c for c in feature_cols if df[c].dtype != 'category' and not pd.api.types.is_object_dtype(df[c])]
+    categorical_features = [c for c in feature_cols if c not in numeric_features]
+
+    X_numeric = df[numeric_features].astype('float32')
+    
+    # Simple encoding for categories if any exist (usually ID columns we already dropped)
+    if categorical_features:
+        X_cat = pd.get_dummies(df[categorical_features], drop_first=True)
+        X = pd.concat([X_numeric, X_cat], axis=1)
+    else:
+        X = X_numeric
+
     y_reg = df["RUL_hours"].values
     y_cls = df["failure_mode"].values
 
+    update_progress("train", 25, "Scaling features...")
     # Scale target (regression)
     y_scaler = StandardScaler()
     y_reg_scaled = y_scaler.fit_transform(y_reg.reshape(-1, 1)).ravel()
 
-    # Scale features
+    # Scale numeric features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Random stratified split for classification balance (time-based + stratify attempt)
-    # Note: For strict time-series, use time-based; here we mix for balance
+    update_progress("train", 30, "Splitting data for training...")
+    # Random stratified split
     X_train, X_temp, y_reg_train_s, y_reg_temp_s, y_cls_train, y_cls_temp = train_test_split(
-        X_scaled, y_reg_scaled, y_cls, test_size=0.3, random_state=42, stratify=y_cls
+        X_scaled, y_reg_scaled, y_cls, test_size=0.25, random_state=42, stratify=y_cls
     )
     X_val, X_test, y_reg_val_s, y_reg_test_s, y_cls_val, y_cls_test = train_test_split(
         X_temp, y_reg_temp_s, y_cls_temp, test_size=0.5, random_state=42, stratify=y_cls_temp
@@ -130,78 +151,52 @@ def main(mode):
 
     print(f"Train / Val / Test split: {len(X_train):,} / {len(X_val):,} / {len(X_test):,}\n")
 
+    update_progress("train", 40, "Training RUL Regressor (XGBoost)...")
     # ── Regression ──────────────────────────────────────────────────────────
-    print("Training RUL Regressor...")
-    reg_start = time.time()
-
     reg = xgb.XGBRegressor(
-        n_estimators=cfg["training"]["n_estimators_max"],
-        learning_rate=0.04,
-        max_depth=7,
-        subsample=0.85,
-        colsample_bytree=0.75,
+        n_estimators=1000,
+        learning_rate=0.08,
+        max_depth=6,
+        subsample=0.8,
+        colsample_bytree=0.8,
         tree_method="hist",
         device="cpu",
         random_state=42,
         n_jobs=-1,
-        verbosity=1,
-        eval_metric="rmse",
-        early_stopping_rounds=cfg["training"]["early_stopping_rounds"]
+        early_stopping_rounds=30
     )
 
     reg.fit(
         X_train, y_reg_train_s,
         eval_set=[(X_val, y_reg_val_s)],
-        verbose=50
+        verbose=False
     )
 
-    reg_time = time.time() - reg_start
-    print(f"Regressor trained in {reg_time:.1f} seconds")
-    print(f"Best iteration    : {reg.best_iteration + 1 if hasattr(reg, 'best_iteration') else 'N/A'}\n")
-
+    update_progress("train", 70, "Training Failure Classifier...")
     # ── Classification ──────────────────────────────────────────────────────
-    print("Training Failure Mode Classifier...")
-    clf_start = time.time()
-
     le = LabelEncoder()
     y_cls_train_enc = le.fit_transform(y_cls_train)
     y_cls_val_enc   = le.transform(y_cls_val)
     y_cls_test_enc  = le.transform(y_cls_test)
 
-    # Compute class weights for imbalance
-    unique_classes = np.unique(y_cls_train_enc)
-    class_weights = compute_class_weight('balanced', classes=unique_classes, y=y_cls_train_enc)
-    class_weight_dict = dict(zip(unique_classes, class_weights))
-
     clf = xgb.XGBClassifier(
-        n_estimators=1000,  # increased for better learning
-        learning_rate=0.03,  # lower LR for imbalance
-        max_depth=8,         # slightly deeper
-        subsample=0.8,
-        colsample_bytree=0.75,
+        n_estimators=500,
+        learning_rate=0.1,
+        max_depth=6,
         tree_method="hist",
         device="cpu",
         random_state=42,
         n_jobs=-1,
-        eval_metric="mlogloss",
-        early_stopping_rounds=50,
-        scale_pos_weight=class_weights[1] if len(class_weights) > 1 else 1  # for binary, extend for multi
+        early_stopping_rounds=20
     )
 
     clf.fit(
         X_train, y_cls_train_enc,
         eval_set=[(X_val, y_cls_val_enc)],
-        verbose=50,
-        sample_weight=class_weights[y_cls_train_enc]  # weighted samples
+        verbose=False
     )
 
-    clf_time = time.time() - clf_start
-    print(f"Classifier trained in {clf_time:.1f} seconds")
-    print(f"Best iteration    : {clf.best_iteration + 1 if hasattr(clf, 'best_iteration') else 'N/A'}\n")
-
-    # ── Evaluation ──────────────────────────────────────────────────────────
-
-    print("Evaluating models...")
+    update_progress("train", 90, "Evaluating and saving artifacts...")
 
     # Regression
     y_reg_pred_s = reg.predict(X_test)
@@ -255,6 +250,12 @@ def main(mode):
     total_time = time.time() - start_total
     print(f"\nTraining pipeline completed in {total_time/60:.1f} minutes")
     print(f"Artifacts saved to: {artifacts_dir}")
+
+
+@click.command()
+@click.option("--mode", default="sample", help="Dataset mode: sample / medium / full")
+def main(mode):
+    run_training(mode)
 
 
 if __name__ == "__main__":

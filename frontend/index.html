@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobotGuard AI - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0a0b10] text-[#f0f0f0]">
+    <div class="bg-mesh"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/10 px-8 py-4 flex justify-between items-center mx-4 mt-4">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl font-bold neon-text-cyan">🤖 RobotGuard AI</span>
+        </div>
+        <div class="flex gap-8">
+            <a href="index.html" class="nav-link active font-semibold">Home</a>
+            <a href="pages/control.html" class="nav-link text-white/70 hover:text-white">Pipeline Control</a>
+            <a href="pages/predict.html" class="nav-link text-white/70 hover:text-white">Prediction</a>
+            <a href="pages/analysis.html" class="nav-link text-white/70 hover:text-white">EDA Analysis</a>
+        </div>
+        <div class="flex items-center gap-2">
+            <div id="status-dot" class="status-pulse bg-cyan-400"></div>
+            <span id="status-text" class="text-sm font-medium text-cyan-400">System Online</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <!-- Hero Section -->
+        <section class="flex flex-col md:flex-row items-center gap-12 mb-20 animate-fade-in">
+            <div class="flex-1 space-y-6">
+                <h1 class="text-5xl md:text-7xl font-bold leading-tight">
+                    Predictive <span class="neon-text-cyan">Maintenance</span> <br> for Next-Gen Robotics
+                </h1>
+                <p class="text-xl text-white/60 max-w-2xl">
+                    Transforming raw sensor telemetry into actionable insights. Forecast Remaining Useful Life (RUL) and detect failure modes with industrial-grade AI.
+                </p>
+                <div class="flex gap-4 pt-4">
+                    <a href="pages/control.html" class="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(0,245,255,0.3)]">
+                        Initialize Pipeline
+                    </a>
+                    <a href="pages/predict.html" class="px-8 py-4 glass hover:bg-white/10 font-bold rounded-lg transition-all border border-white/20">
+                        Live Inference
+                    </a>
+                </div>
+            </div>
+            <div class="flex-1 relative">
+                <div class="absolute -inset-4 bg-cyan-500/20 blur-3xl rounded-full"></div>
+                <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1000" 
+                     alt="Industrial Robot" 
+                     class="relative rounded-2xl glass shadow-2xl border border-white/20 transform -rotate-2 hover:rotate-0 transition-all duration-500">
+            </div>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-20">
+            <div class="glass p-6 neon-border-cyan group hover:bg-white/5 transition-all">
+                <h3 class="text-white/50 text-sm font-semibold uppercase mb-2">Total Telemetry</h3>
+                <p class="text-4xl font-bold">5.34M <span class="text-sm text-cyan-400">Rows</span></p>
+            </div>
+            <div class="glass p-6 neon-border-cyan group hover:bg-white/5 transition-all">
+                <h3 class="text-white/50 text-sm font-semibold uppercase mb-2">RUL Accuracy</h3>
+                <p class="text-4xl font-bold">0.710 <span class="text-sm text-cyan-400">R²</span></p>
+            </div>
+            <div class="glass p-6 neon-border-cyan group hover:bg-white/5 transition-all">
+                <h3 class="text-white/50 text-sm font-semibold uppercase mb-2">Failure Detect</h3>
+                <p class="text-4xl font-bold">85% <span class="text-sm text-cyan-400">F1</span></p>
+            </div>
+            <div class="glass p-6 neon-border-cyan group hover:bg-white/5 transition-all">
+                <h3 class="text-white/50 text-sm font-semibold uppercase mb-2">Fleet Size</h3>
+                <p class="text-4xl font-bold">2,000 <span class="text-sm text-cyan-400">Units</span></p>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="space-y-12">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold">Comprehensive ML Pipeline</h2>
+                <p class="text-white/40">From raw signals to production maintenance alerts</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass p-8 space-y-4">
+                    <div class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center neon-text-cyan text-2xl">📊</div>
+                    <h3 class="text-xl font-bold">Synthetic Gen</h3>
+                    <p class="text-white/50">High-fidelity simulation of multi-modal degradation cycles across 6-axis kinematics.</p>
+                </div>
+                <div class="glass p-8 space-y-4">
+                    <div class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center neon-text-cyan text-2xl">⚙️</div>
+                    <h3 class="text-xl font-bold">Spectral Insights</h3>
+                    <p class="text-white/50">80+ engineered features including rolling statistics, FFT analysis, and cyclic encodings.</p>
+                </div>
+                <div class="glass p-8 space-y-4">
+                    <div class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center neon-text-cyan text-2xl">🚀</div>
+                    <h3 class="text-xl font-bold">Real-time Inference</h3>
+                    <p class="text-white/50">Micro-second latency predictions for both RUL and classification of 5 common failure modes.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10 mt-20 py-10 text-center">
+        <p class="text-white/40 text-sm">RobotGuard AI &bull; Built with FastAPI, Tailwind & JavaScript</p>
+    </footer>
+
+    <script src="assets/js/api.js"></script>
+    <script>
+        // Check health on load
+        window.addEventListener('load', async () => {
+            try {
+                const health = await API.health();
+                if (!health.healthy && health.status !== 'healthy') {
+                    throw new Error();
+                }
+            } catch (e) {
+                document.getElementById('status-dot').className = 'status-pulse bg-red-500';
+                document.getElementById('status-text').innerText = 'Backend Offline';
+                document.getElementById('status-text').className = 'text-sm font-medium text-red-500';
+            }
+        });
+    </script>
+</body>
+</html>

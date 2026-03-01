@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobotGuard AI - Live Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#0a0b10] text-[#f0f0f0]">
+    <div class="bg-mesh"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/10 px-8 py-4 flex justify-between items-center mx-4 mt-4">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl font-bold neon-text-cyan">🤖 RobotGuard AI</span>
+        </div>
+        <div class="flex gap-8">
+            <a href="../index.html" class="nav-link text-white/70 hover:text-white">Home</a>
+            <a href="control.html" class="nav-link text-white/70 hover:text-white">Pipeline Control</a>
+            <a href="predict.html" class="nav-link active font-semibold">Prediction</a>
+            <a href="analysis.html" class="nav-link text-white/70 hover:text-white">EDA Analysis</a>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="status-pulse bg-cyan-400"></div>
+            <span class="text-sm font-medium text-cyan-400">Live Engine</span>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="mb-12">
+            <h1 class="text-4xl font-bold mb-2">Live <span class="neon-text-cyan">Inference & Monitoring</span></h1>
+            <p class="text-white/50">Input real-time sensor measurements to analyze health and estimate remaining lifespan.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- Input Section -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="glass p-8 border border-white/10">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <span class="text-cyan-400">●</span> Sensor Inputs
+                    </h2>
+                    <form id="predict-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 uppercase mb-2">Vibration (RMS)</label>
+                            <input type="number" step="0.01" name="vibration" value="0.5" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 uppercase mb-2">Torque (Nm)</label>
+                            <input type="number" step="0.1" name="torque" value="10.0" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 uppercase mb-2">Temperature (°C)</label>
+                            <input type="number" step="1" name="temperature" value="45" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 uppercase mb-2">Motor Current (A)</label>
+                            <input type="number" step="0.1" name="current" value="2.0" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 uppercase mb-2">Joint Angle (deg)</label>
+                            <input type="number" step="1" name="joint_angle" value="90" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 uppercase mb-2">Hours Since Service</label>
+                            <input type="number" step="10" name="hours_since_service" value="100" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-cyan-500">
+                        </div>
+                        <button type="submit" class="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-all shadow-[0_10px_30px_rgba(0,245,255,0.2)]">
+                            Compute Predictions
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dashboard Visualization -->
+            <div class="lg:col-span-2 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Gauge -->
+                    <div class="glass p-8 border border-white/10 flex flex-col items-center justify-center">
+                        <h3 class="text-white/50 text-sm font-semibold uppercase mb-6">Remaining Useful Life</h3>
+                        <div class="relative w-full max-w-[300px]">
+                            <canvas id="gaugeChart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pt-8">
+                                <span id="rul-value" class="text-5xl font-bold tracking-tighter">--</span>
+                                <span class="text-sm text-white/40 font-semibold">Hours</span>
+                            </div>
+                        </div>
+                        <p id="rul-status" class="mt-8 px-4 py-1 rounded-full text-xs font-bold bg-white/5 uppercase tracking-widest text-white/40">Status: Waiting</p>
+                    </div>
+
+                    <!-- Failure Probability -->
+                    <div class="glass p-8 border border-white/10">
+                        <h3 class="text-white/50 text-sm font-semibold uppercase mb-6">Failure Diagnostics</h3>
+                        <div class="h-[250px]">
+                            <canvas id="probChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis JSON -->
+                <div class="glass p-8 border border-white/10">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-white/50 text-sm font-semibold uppercase">API Response Metadata</h3>
+                        <button onclick="copyRaw()" class="text-xs text-cyan-400 hover:text-white transition-all uppercase font-bold tracking-widest">Copy Raw JSON</button>
+                    </div>
+                    <pre id="raw-output" class="text-xs text-cyan-400/70 p-4 bg-black/40 rounded-lg overflow-x-auto border border-white/5 min-h-[100px]">
+// Initiate prediction to see raw data output
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../assets/js/api.js"></script>
+    <script>
+        let gaugeChart, probChart;
+
+        function initCharts() {
+            // Gauge Chart
+            const ctxGauge = document.getElementById('gaugeChart').getContext('2d');
+            gaugeChart = new Chart(ctxGauge, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, 400],
+                        backgroundColor: ['#00f5ff', 'rgba(255,255,255,0.05)'],
+                        borderWidth: 0,
+                        circumference: 180,
+                        rotation: 270,
+                        cutout: '85%',
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    animation: { duration: 2000, easing: 'easeOutQuart' },
+                    plugins: { tooltip: { enabled: false }, legend: { display: false } }
+                }
+            });
+
+            // Probability Chart
+            const ctxProb = document.getElementById('probChart').getContext('2d');
+            probChart = new Chart(ctxProb, {
+                type: 'bar',
+                data: {
+                    labels: ['Normal', 'Bearing', 'Gear', 'Overheat', 'Vibration'],
+                    datasets: [{
+                        label: 'Probability',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(0, 245, 255, 0.4)',
+                        borderColor: '#00f5ff',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, max: 1, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                        y: { grid: { display: false }, ticks: { color: '#ccc' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        document.getElementById('predict-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert to numbers
+            for (let key in data) data[key] = parseFloat(data[key]);
+
+            try {
+                const res = await API.predict(data);
+                if (res.status === 'success') {
+                    updateDashboard(res);
+                } else {
+                    alert('Prediction Error: ' + res.detail);
+                }
+            } catch (err) {
+                alert('Connection Error. Ensure FastAPI is running.');
+            }
+        });
+
+        function updateDashboard(res) {
+            const rul = res.predicted_rul_hours;
+            const probs = res.failure_probabilities;
+
+            // Update Value
+            document.getElementById('rul-value').innerText = Math.round(rul);
+            document.getElementById('raw-output').innerText = JSON.stringify(res, null, 2);
+
+            // Update Status Badge
+            const statusEl = document.getElementById('rul-status');
+            if (rul < 50) {
+                statusEl.className = 'mt-8 px-4 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-500 uppercase tracking-widest';
+                statusEl.innerText = 'STATUS: CRITICAL';
+            } else if (rul < 150) {
+                statusEl.className = 'mt-8 px-4 py-1 rounded-full text-xs font-bold bg-orange-500/20 text-orange-500 uppercase tracking-widest';
+                statusEl.innerText = 'STATUS: WARNING';
+            } else {
+                statusEl.className = 'mt-8 px-4 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-500 uppercase tracking-widest';
+                statusEl.innerText = 'STATUS: STABLE';
+            }
+
+            // Update Gauge
+            gaugeChart.data.datasets[0].data = [rul, Math.max(0, 400 - rul)];
+            gaugeChart.update();
+
+            // Update Probabilities
+            probChart.data.labels = Object.keys(probs);
+            probChart.data.datasets[0].data = Object.values(probs);
+            probChart.update();
+        }
+
+        function copyRaw() {
+            const text = document.getElementById('raw-output').innerText;
+            navigator.clipboard.writeText(text);
+        }
+
+        window.onload = initCharts;
+    </script>
+</body>
+</html>

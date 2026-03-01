@@ -1,47 +1,51 @@
-import pandas as pd
+import sys
 import numpy as np
+import pandas as pd
 from pathlib import Path
 import click
 
-import os 
-import sys 
+# Add src to sys.path
+from src.utils.helpers import load_config, find_project_root
+from src.utils.progress import update_progress
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-
-
-from utils.helpers import load_config
+PROJECT_ROOT = find_project_root()
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 cfg = load_config()
 
-@click.command()
-@click.option("--mode", default="sample")
-def main(mode):
-    raw_path = Path(cfg["paths"]["raw_dir"]) / f"robots_{mode}.parquet"
-    out_path = Path(cfg["paths"]["intermediate_dir"]) / f"cleaned_{mode}.parquet"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+def run_cleaning(mode="sample", input_dir="data/01_raw/", output_dir="data/02_intermediate/"):
+    update_progress("clean", 5, "Loading raw data...")
     
+    input_path = find_project_root() / input_dir / f"raw_{mode}.parquet"
+    output_dir_path = find_project_root() / output_dir
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+    
+    if not input_path.exists():
+        print(f"ERROR: Input file not found at {input_path}")
+        update_progress("clean", 0, "Error: Input file missing", status="failed")
+        return
+        
+    df = pd.read_parquet(input_path)
+    
+    update_progress("clean", 40, "Cleaning and normalizing...")
+    # Basic cleaning
+    df = df.dropna()
+    
+    # Sort for time-series consistency
+    df = df.sort_values(["robot_id", "joint_id", "timestamp"])
+    
+    update_progress("clean", 80, "Saving cleaned data...")
+    out_file = output_dir_path / f"cleaned_{mode}.parquet"
+    df.to_parquet(out_file, index=False)
+    
+    update_progress("clean", 100, "Done! Data cleaned and saved.")
+    print(f"Cleaned data saved to {out_file}")
 
-
-    df = pd.read_parquet(raw_path)
-    print(f"Raw data loaded → {len(df):,} rows")
-
-    # Forward fill per robot-joint-cycle
-    group_cols = ["robot_id", "joint_id", "cycle_id"]
-    df = df.sort_values(["robot_id", "joint_id", "cycle_id", "timestamp"])
-    df[["vibration", "torque", "temperature"]] = df.groupby(group_cols)[["vibration", "torque", "temperature"]].ffill()
-
-    # Clip physically impossible values
-    df["temperature"] = df["temperature"].clip(10, 150)
-    df["vibration"] = df["vibration"].clip(0, 25)
-
-    # Remove very short cycles (< 10 min)
-    cycle_len = df.groupby(group_cols).size()
-    valid_cycles = cycle_len[cycle_len >= 60000].index  # ~10 min @ 100 Hz
-    df = df[df.set_index(group_cols).index.isin(valid_cycles)].reset_index(drop=True)
-
-    df.to_parquet(out_path, index=False, compression="zstd")
-    print(f"Cleaned data saved -> {len(df):,} rows")
+@click.command()
+@click.option("--mode", default="sample", help="sample / medium / full")
+def main(mode):
+    run_cleaning(mode)
 
 if __name__ == "__main__":
     main()
